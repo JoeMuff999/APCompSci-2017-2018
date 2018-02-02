@@ -42,8 +42,7 @@ public class Interface extends Frame implements ActionListener,WindowListener
         addTable.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e)
                 {
-
-                    System.out.println("test");
+                    new editTablesWindow();
 
                 }
             });
@@ -60,6 +59,8 @@ public class Interface extends Frame implements ActionListener,WindowListener
         whichTab.addTab("Menu",tab2);
 
     }
+    
+   
 
     public void     windowClosing(WindowEvent e)
     {
