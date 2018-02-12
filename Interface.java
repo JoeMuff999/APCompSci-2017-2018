@@ -1,31 +1,38 @@
-    import javax.swing.*;
-    import java.awt.*;
-    import java.awt.event.*;
-    import java.io.Serializable;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+import java.io.Serializable;
 public class Interface extends Frame implements ActionListener,WindowListener,MouseListener
 {
-    JTabbedPane whichTab = new JTabbedPane();
+    JTabbedPane whichTab;
     JButton addTable;
     public JFrame main;
-    editTablesWindow editWindow = new editTablesWindow();
+    // private editTablesWindow editWindow;
     ImageIcon rectFour = new ImageIcon("rectFour.png");
-
+    JPanel grid;
+    JPanel tab1;
+    public static Interface mainWindow;
+    int firstTimeThroughEditWindow = 0;
+    JToggleButton[][] gridClickers;
+    int rowNumber;
+    int columnNumber;
+    boolean getter;
     public static void main(String [] args)
     {
-        new Interface();
+        mainWindow = new Interface();
     }
 
     public  Interface()
     {
+        //editWindow = new editTablesWindow();
+        // editWindow.dispose();
         main = new JFrame();
         main.setDefaultLookAndFeelDecorated(true);
         tabInterface();
         main.add(whichTab);
-        
+
         main.addMouseListener(this);
-        
-        
-        
+
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         main.addWindowListener(this);
         main.setTitle("Muffoletto Restaurant Services: Version 1.0");
@@ -37,8 +44,9 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     public void tabInterface()
     {
         //first tab
+        whichTab = new JTabbedPane();
 
-        JPanel tab1 = new JPanel();
+        tab1 = new JPanel();
         tab1.setLayout(new BorderLayout());
         JLabel tab1Label = new JLabel("Restauraunt Layout");
         tab1Label.setHorizontalAlignment(SwingConstants.CENTER);
@@ -70,11 +78,109 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
         whichTab.addTab("Menu",tab2);
 
     }
-    
-    public void placeTable(int x, int y)
+
+    public void placeTable()
     {
-        JLabel table = new JLabel(rectFour);
-        
+        for(int x = 0; x < rowNumber; x++)
+        {
+            for(int y = 0; y < columnNumber; y++)
+            {
+                gridClickers[x][y].setEnabled(true);
+            }
+        }
+        for(int x = 0; x < rowNumber; x++)
+        {
+            for(int y = 0; y < columnNumber; y++)
+            {
+                if(gridClickers[x][y].isSelected())
+                {
+                    System.out.println( x + " " + y);
+                    editTablesWindow.location = false;
+                    getter = editTablesWindow.location;
+                    gridClickers[x][y].setSelected(false);
+                    //disabling all the tables again
+                    for(int z = 0; z < rowNumber; z++)
+                    {
+                        for(int p = 0; p < columnNumber; p++)
+                        {
+                            gridClickers[z][p].setEnabled(false);
+                        }
+                    }
+
+                }
+            }
+        }
+
+    }
+
+    public void setGrid(String rows, String columns)
+    {
+        rowNumber = Integer.parseInt(rows);
+        columnNumber = Integer.parseInt(columns);
+        grid = new JPanel();
+        grid.setLayout(new GridLayout(rowNumber, columnNumber));
+        gridClickers = new JToggleButton[rowNumber][columnNumber];
+
+        for(int x = 0; x < rowNumber; x++)
+        {
+            for(int y = 0; y < columnNumber; y++)
+            {
+
+                gridClickers[x][y] = new JToggleButton(x + " " + y);
+
+                if( x%2 ==y%2 )
+                {
+
+                    gridClickers[x][y].setBackground(Color.WHITE);
+                    gridClickers[x][y].setEnabled(false);
+                    gridClickers[x][y].addActionListener(this);
+
+                }
+                else
+                {
+
+                    gridClickers[x][y].setBackground(Color.BLACK);
+                    gridClickers[x][y].setEnabled(false);
+                    gridClickers[x][y].addActionListener(this);
+
+                }
+                grid.add(gridClickers[x][y]);
+            }            
+        }
+
+        tab1.add(grid,BorderLayout.CENTER);
+        tab1.validate();
+        tab1.repaint();
+
+    }
+
+    public boolean firstTimeEditingTables()
+    {
+        if(firstTimeThroughEditWindow == 0)
+        {
+            firstTimeThroughEditWindow++;
+            return true;
+
+        }
+        else if (firstTimeThroughEditWindow ==1)
+        {
+            firstTimeThroughEditWindow++;
+            return true;
+        }
+        else
+        {
+            return false;
+        }
+    }
+
+    public void setTableLocation()
+    {
+        getter =  editTablesWindow.location;
+        if(getter)
+        {
+
+            placeTable();
+        }
     }
 
     public void     windowClosing(WindowEvent e)
@@ -84,6 +190,8 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
 
     public void actionPerformed(ActionEvent e)
     {
+        setTableLocation();
+        //System.out.println("test");
 
     }
 
@@ -98,38 +206,22 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     public void     windowOpened(WindowEvent e){}
 
     public void     windowClosed(WindowEvent e){
-
     }
 
     public void mousePressed(MouseEvent e) 
     {
-        
-        boolean getter = editTablesWindow.location;
-        if(getter)
-        {
-           // System.out.println("test");
-            editTablesWindow.location = false;
-            //System.out.println(editTablesWindow.location);
-            getter = editTablesWindow.location;
-            placeTable(getX(),getY());
-            
-        }
 
     }
 
     public void mouseReleased(MouseEvent e) {
-
     }
 
     public void mouseEntered(MouseEvent e) {
-
     }
 
     public void mouseExited(MouseEvent e) {
-
     }
 
     public void mouseClicked(MouseEvent e) {
-
     }
 }

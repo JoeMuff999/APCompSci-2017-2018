@@ -13,8 +13,15 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
     JPanel chairCountFix;
     public static boolean location;
     JPanel layoutSize;
+    Interface mainWindow = Interface.mainWindow;
+
+    public static boolean firstTimeThrough;
+
+    String rowNumber;
+    String columnNumber;
     public editTablesWindow()
     {
+
         edit = new JFrame();
         edit.setTitle("Edit Table Layout");
         edit.setLayout(new BorderLayout());
@@ -28,7 +35,16 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
         addTable.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e)
                 {
-                    setGridSize();
+
+                    if(mainWindow.firstTimeEditingTables())
+                    {
+                        setGridSize();
+                        firstTimeThrough = false;
+                    }
+                    else
+                    {
+                        addingTable();
+                    }
                 }
             });
 
@@ -57,6 +73,7 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
 
     public void setGridSize()
     {
+
         edit.remove(addOrRemoveTables);
         edit.validate();
         edit.repaint();
@@ -64,25 +81,31 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
         layoutSize = new JPanel();
         layoutSize.setLayout(new BorderLayout());
 
+        Choice xChooser = new Choice();        
+        Choice yChooser = new Choice();
+
         JButton youDoneBruv = new JButton("Okay");
         youDoneBruv.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e)
                 {
+                    rowNumber = xChooser.getSelectedItem();
+                    columnNumber = yChooser.getSelectedItem();
+
+                    mainWindow.setGrid(rowNumber,columnNumber);
                     addingTable();
+
                 }
             });
-            
+
         JLabel rowSize = new JLabel("How many rows?");
         JLabel columnSize = new JLabel("How many columns?");
-        
+
         JPanel labels = new JPanel();
         labels.setLayout(new BorderLayout());
-        
+
         labels.add(rowSize,BorderLayout.WEST);
         labels.add(columnSize,BorderLayout.EAST);
-        
 
-        Choice xChooser = new Choice();
         xChooser.add("1");
         xChooser.add("2");
         xChooser.add("3");
@@ -91,7 +114,6 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
         xChooser.add("6");
         xChooser.add("7");
 
-        Choice yChooser = new Choice();
         yChooser.add("1");
         yChooser.add("2");
         yChooser.add("3");
@@ -99,9 +121,9 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
         yChooser.add("5");
         yChooser.add("6");
         yChooser.add("7");
-        
+
         Dimension o = new Dimension(180,30);
-        
+
         xChooser.setPreferredSize(o);
         yChooser.setPreferredSize(o);
 
@@ -118,12 +140,20 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
 
     public void addingTable()
     {
-        edit.remove(layoutSize);
-        edit.validate();
-        edit.repaint();
+        if(mainWindow.firstTimeEditingTables())
+        {
+            edit.remove(layoutSize);
+            edit.validate();
+            edit.repaint();
+        }
+        else
+        {
+            edit.remove(addOrRemoveTables);
+            edit.validate();
+            edit.repaint();
+        }
 
         edit.setTitle("Choose Parameters for table");
-
         JPanel chooseType = new JPanel();
         chooseType.setLayout(new BorderLayout());
 
@@ -152,8 +182,11 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
         selectLocation.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e)
                 {
-                    setTableLocation();
+
+                    edit.setOpacity(0.6f);
+                    new instructionsPopUp();
                     location = true;
+                    mainWindow.setTableLocation();
 
                 }
             });
@@ -184,14 +217,6 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
 
     }
 
-    public void setTableLocation()
-    {
-        /*edit.setBackground(new Color(0, 0, 0, 0));
-        addOrRemoveTables.setOpaque(false);
-        chairCountFix.setOpaque(false);*/
-        edit.setOpacity(0.6f);
-        new instructionsPopUp();
-    }
 
     public void actionPerformed(ActionEvent e)
     {
