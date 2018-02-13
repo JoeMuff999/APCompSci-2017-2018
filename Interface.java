@@ -2,13 +2,22 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
+import java.awt.Image;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import javax.imageio.ImageIO;
+import java.io.*;
 public class Interface extends Frame implements ActionListener,WindowListener,MouseListener
 {
     JTabbedPane whichTab;
     JButton addTable;
     public JFrame main;
     // private editTablesWindow editWindow;
-    ImageIcon rectFour = new ImageIcon("rectFour.png");
+    ImageIcon rectFourEmpty = new ImageIcon("rectFourEmpty.png");
+    ImageIcon rectFourFull = new ImageIcon("rectFourFull.png");
+    ImageIcon rectFourDirty = new ImageIcon("rectFourDirty.png");
+    ImageIcon rectFourCheck = new ImageIcon("rectFourCheck.png");
+    //ImageIcon rectFour;
     JPanel grid;
     JPanel tab1;
     public static Interface mainWindow;
@@ -17,6 +26,8 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     int rowNumber;
     int columnNumber;
     boolean getter;
+    int gridButtonWidth;
+    int gridButtonLength;
     public static void main(String [] args)
     {
         mainWindow = new Interface();
@@ -95,15 +106,20 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
                 if(gridClickers[x][y].isSelected())
                 {
                     System.out.println( x + " " + y);
+                    placeTableIcon(x,y);
                     editTablesWindow.location = false;
                     getter = editTablesWindow.location;
                     gridClickers[x][y].setSelected(false);
+                    editTablesWindow.disposeEdit();
                     //disabling all the tables again
                     for(int z = 0; z < rowNumber; z++)
                     {
                         for(int p = 0; p < columnNumber; p++)
                         {
-                            gridClickers[z][p].setEnabled(false);
+                            if(gridClickers[z][p].getIcon() == null)
+                            {
+                                gridClickers[z][p].setEnabled(false);
+                            }
                         }
                     }
 
@@ -111,6 +127,11 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
             }
         }
 
+    }
+
+    public void placeTableIcon(int row, int column)
+    {
+        gridClickers[row][column].setIcon(rectFourEmpty);
     }
 
     public void setGrid(String rows, String columns)
@@ -148,10 +169,51 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
             }            
         }
 
+        
+
         tab1.add(grid,BorderLayout.CENTER);
         tab1.validate();
         tab1.repaint();
+        imageResizing();
 
+    }
+    //Set a table to full, timer to change tables to check, set a table to dirty etc...
+    public void changeStateOfTables()
+    {
+        for(int x = 0; x < rowNumber; x++)
+        {
+            for(int y = 0; y < columnNumber; y++)
+            {
+                if(gridClickers[x][y].isSelected() && gridClickers[x][y].getIcon() != null)
+                {
+                    System.out.println("test");
+                    gridClickers[x][y].setSelected(false);
+                    new tableStateEditor();
+                }
+            }
+        }
+    }
+    
+    public void imageResizing()
+    {
+       /* gridButtonWidth = gridClickers[0][0].getWidth();
+        gridButtonLength = gridClickers[0][0].getHeight();
+
+        BufferedImage img = null;
+        try {
+            img = ImageIO.read(new File("rectFourEmpty.png"));
+        } catch (IOException e) {
+            
+        }
+       // System.out.println("test");
+
+
+        BufferedImage resizedImage = new BufferedImage(gridButtonWidth, gridButtonLength,BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(resizedImage, 0, 0, gridButtonWidth, gridButtonLength, null);
+        g.dispose();
+        
+        rectFour = new ImageIcon(resizedImage);*/
     }
 
     public boolean firstTimeEditingTables()
@@ -191,6 +253,7 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     public void actionPerformed(ActionEvent e)
     {
         setTableLocation();
+        changeStateOfTables();
         //System.out.println("test");
 
     }

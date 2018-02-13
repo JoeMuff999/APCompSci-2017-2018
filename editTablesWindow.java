@@ -5,7 +5,7 @@ import java.io.Serializable;
 import static java.awt.GraphicsDevice.WindowTranslucency.*;
 public class editTablesWindow extends JFrame implements ActionListener, WindowListener
 {
-    JFrame edit;
+    static JFrame edit;
     JButton removeTable;
     JButton addTable;
     JPanel addOrRemoveTables;
@@ -187,6 +187,8 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
                     new instructionsPopUp();
                     location = true;
                     mainWindow.setTableLocation();
+                    //edit.dispose();
+                    
 
                 }
             });
@@ -210,6 +212,11 @@ public class editTablesWindow extends JFrame implements ActionListener, WindowLi
         edit.validate();
         edit.repaint();
 
+    }
+    
+    public static void disposeEdit()
+    {
+            edit.dispose();
     }
 
     public void removingTable()
