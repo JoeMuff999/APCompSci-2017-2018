@@ -28,6 +28,9 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     boolean getter;
     int gridButtonWidth;
     int gridButtonLength;
+    public Tables[][] gridTables;
+    
+    
     public static void main(String [] args)
     {
         mainWindow = new Interface();
@@ -37,6 +40,8 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     {
         //editWindow = new editTablesWindow();
         // editWindow.dispose();
+        
+        
         main = new JFrame();
         main.setDefaultLookAndFeelDecorated(true);
         tabInterface();
@@ -132,6 +137,8 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     public void placeTableIcon(int row, int column)
     {
         gridClickers[row][column].setIcon(rectFourEmpty);
+        gridTables[row][column] = new Tables(true,false);
+        //System.out.println(gridTables[row][column]);
     }
 
     public void setGrid(String rows, String columns)
@@ -141,6 +148,8 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
         grid = new JPanel();
         grid.setLayout(new GridLayout(rowNumber, columnNumber));
         gridClickers = new JToggleButton[rowNumber][columnNumber];
+        
+        gridTables = new Tables[rowNumber][columnNumber];
 
         for(int x = 0; x < rowNumber; x++)
         {
@@ -188,7 +197,7 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
                 {
                     System.out.println("test");
                     gridClickers[x][y].setSelected(false);
-                    new tableStateEditor();
+                    new tableStateEditor(x,y);
                 }
             }
         }
