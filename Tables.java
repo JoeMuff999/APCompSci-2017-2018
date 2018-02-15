@@ -2,9 +2,11 @@ public  class Tables
 {
     public boolean empty;
     public boolean dirty;
+    public boolean openTab;
 
     public Tables()
     {
+        
 
     }
 
@@ -12,6 +14,7 @@ public  class Tables
     {
         empty = isEmpty;
         dirty = isDirty;
+        openTab = false;
     }
 
     public void setEmpty(boolean emptyOrNot)
@@ -22,6 +25,11 @@ public  class Tables
     public void setDirty(boolean dirtyOrNot)
     {
         dirty = dirtyOrNot;
+    }
+    
+    public void setOpenTab(boolean tabOrNot)
+    {
+        openTab = tabOrNot;
     }
 
     public String toString()

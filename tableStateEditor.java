@@ -9,9 +9,9 @@ public class tableStateEditor extends JFrame implements ActionListener, WindowLi
     {
         setLayout(new BorderLayout());
         choices(row,column);
-
+        this.setLocation(300,200);
         setTitle("Change State of Table");        
-        setSize(200,350);
+        setSize(200,200);
         setVisible(true);
     }
 
@@ -23,9 +23,10 @@ public class tableStateEditor extends JFrame implements ActionListener, WindowLi
         JLabel isTheTableEmpty = new JLabel("Empty? " + mainWindow.gridTables[row][column].empty 
                 + "| Dirty? " + mainWindow.gridTables[row][column].dirty);
         JPanel consolidationPanel = new JPanel();
-        
-        consolidationPanel.setLayout(new BorderLayout());
 
+        JButton confirm = new JButton("Confirm Changes");
+
+        consolidationPanel.setLayout(new BorderLayout());
         JPanel labelContainer = new JPanel();
         labelContainer.setLayout(new BorderLayout());
         JLabel dirtyChooserLabel = new JLabel("Dirty or Clean?");
@@ -43,14 +44,24 @@ public class tableStateEditor extends JFrame implements ActionListener, WindowLi
         emptyOrNot.add("Empty");
         emptyOrNot.add("Full");
 
-        dirtyOrNot.add("Dirty");
         dirtyOrNot.add("Clean");
+        dirtyOrNot.add("Dirty");
 
         choicesContainer.add(emptyOrNot,BorderLayout.EAST);
         choicesContainer.add(dirtyOrNot,BorderLayout.WEST);
-        
+
+        confirm.addActionListener(new ActionListener(){
+                public void actionPerformed(ActionEvent e)
+                {
+                    mainWindow.changeStateOfTables(row, column,emptyOrNot.getSelectedItem(),dirtyOrNot.getSelectedItem()); 
+                    dispose();
+
+                }
+            });
+
         consolidationPanel.add(labelContainer,BorderLayout.NORTH);
         consolidationPanel.add(choicesContainer,BorderLayout.CENTER);
+        consolidationPanel.add(confirm,BorderLayout.SOUTH);
 
         main.setLayout(new BorderLayout());
         main.add(currentState,BorderLayout.NORTH);
@@ -60,6 +71,7 @@ public class tableStateEditor extends JFrame implements ActionListener, WindowLi
         add(main,BorderLayout.NORTH);
 
     }
+
     public void     windowClosing(WindowEvent e)
     {
         System.exit(0);

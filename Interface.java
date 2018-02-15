@@ -7,7 +7,9 @@ import java.awt.image.BufferedImage;
 import java.io.File;
 import javax.imageio.ImageIO;
 import java.io.*;
-public class Interface extends Frame implements ActionListener,WindowListener,MouseListener
+import java.util.TimerTask;
+import java.util.Timer;
+public class Interface extends JFrame implements ActionListener,WindowListener,MouseListener
 {
     JTabbedPane whichTab;
     JButton addTable;
@@ -20,17 +22,26 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     //ImageIcon rectFour;
     JPanel grid;
     JPanel tab1;
+    JPanel tab2;
     public static Interface mainWindow;
     int firstTimeThroughEditWindow = 0;
     JToggleButton[][] gridClickers;
-    int rowNumber;
-    int columnNumber;
+    static int rowNumber;
+    static int columnNumber;
     boolean getter;
     int gridButtonWidth;
     int gridButtonLength;
     public Tables[][] gridTables;
-    
-    
+    Timer[][] tableTimers;
+    int[][] counter;
+    int[][] dummyCounter;
+    public static boolean transactionMenuIsOpen;
+    public static boolean transactionMenuAskingForTable = false;
+    static DefaultListModel<String> listManager;
+    transactionManager transaction;
+    openTab[][] tabsForTables;
+
+
     public static void main(String [] args)
     {
         mainWindow = new Interface();
@@ -39,9 +50,10 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     public  Interface()
     {
         //editWindow = new editTablesWindow();
-        // editWindow.dispose();
-        
-        
+        // editWindow.dispose();z
+        listManager = new DefaultListModel<String>();
+
+        setDefaultLookAndFeelDecorated(true);
         main = new JFrame();
         main.setDefaultLookAndFeelDecorated(true);
         tabInterface();
@@ -61,6 +73,10 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     {
         //first tab
         whichTab = new JTabbedPane();
+        
+        tab2 = new JPanel();
+        tab2.setLayout(new BorderLayout());
+        
 
         tab1 = new JPanel();
         tab1.setLayout(new BorderLayout());
@@ -73,6 +89,16 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
         //adding tables (bottom buttons)        
         JPanel bottomButtons = new JPanel(); 
         bottomButtons.setLayout(new BorderLayout());
+        JButton openTransaction = new JButton("Manage and Open New Tabs $");
+        openTransaction.addActionListener(new ActionListener(){
+                public void actionPerformed(ActionEvent e)
+                {
+                    transaction = new transactionManager();
+                    transactionMenuIsOpen = true;
+
+                }
+            });
+
         JButton addTable = new JButton("Edit Table Layout +");
         addTable.addActionListener(new ActionListener(){
                 public void actionPerformed(ActionEvent e)
@@ -83,15 +109,16 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
             });
 
         bottomButtons.add(addTable,BorderLayout.WEST);
+        bottomButtons.add(openTransaction,BorderLayout.CENTER);
         //add the panel of bottom buttons to the first tab
         tab1.add(bottomButtons,BorderLayout.SOUTH);
 
-        JPanel tab2 = new JPanel();
-        JLabel tab2Label = new JLabel("Restauraunt Menu");
-        tab2.add(tab2Label);
+        JPanel tab3 = new JPanel();
+        JLabel tab3Label = new JLabel("Restauraunt Menu");
+        tab3.add(tab3Label);
 
         whichTab.addTab("Floor Layout",tab1);
-        whichTab.addTab("Menu",tab2);
+        whichTab.addTab("Menu",tab3);
 
     }
 
@@ -110,7 +137,7 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
             {
                 if(gridClickers[x][y].isSelected())
                 {
-                    System.out.println( x + " " + y);
+                    //System.out.println( x + " " + y);
                     placeTableIcon(x,y);
                     editTablesWindow.location = false;
                     getter = editTablesWindow.location;
@@ -148,8 +175,12 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
         grid = new JPanel();
         grid.setLayout(new GridLayout(rowNumber, columnNumber));
         gridClickers = new JToggleButton[rowNumber][columnNumber];
-        
+
         gridTables = new Tables[rowNumber][columnNumber];
+        tableTimers = new Timer[rowNumber][columnNumber];
+        dummyCounter = new int[rowNumber][columnNumber];
+        counter = new int[rowNumber][columnNumber];
+         tabsForTables = new openTab[rowNumber][columnNumber];
 
         for(int x = 0; x < rowNumber; x++)
         {
@@ -178,16 +209,14 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
             }            
         }
 
-        
-
         tab1.add(grid,BorderLayout.CENTER);
         tab1.validate();
         tab1.repaint();
-        imageResizing();
+        //imageResizing();
 
     }
     //Set a table to full, timer to change tables to check, set a table to dirty etc...
-    public void changeStateOfTables()
+    public void openTableStateEditor()
     {
         for(int x = 0; x < rowNumber; x++)
         {
@@ -195,34 +224,127 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
             {
                 if(gridClickers[x][y].isSelected() && gridClickers[x][y].getIcon() != null)
                 {
-                    System.out.println("test");
+                    //System.out.println("test");
                     gridClickers[x][y].setSelected(false);
                     new tableStateEditor(x,y);
                 }
             }
         }
     }
-    
-    public void imageResizing()
+
+    public void changeStateOfTables(int row, int column, String empty,String dirty)
     {
-       /* gridButtonWidth = gridClickers[0][0].getWidth();
-        gridButtonLength = gridClickers[0][0].getHeight();
+        //full takes priority over dirty!
+        if(empty.equals("Empty"))
+        {
+            //needs to be empty and dirty for it to show as dirty!
+            gridTables[row][column].setEmpty(true);
+            gridClickers[row][column].setIcon(rectFourEmpty);
+            if(gridTables[row][column].openTab)
+            {
+                gridTables[row][column].setOpenTab(false);
+                tabsForTables[row][column].closeTab();
+            }
 
-        BufferedImage img = null;
-        try {
-            img = ImageIO.read(new File("rectFourEmpty.png"));
-        } catch (IOException e) {
-            
+            if(dirty.equals("Dirty"))
+            {
+                gridClickers[row][column].setIcon(rectFourDirty);
+            }
         }
-       // System.out.println("test");
+        //if its a full table
+        else
+        {
+
+            gridTables[row][column].setEmpty(false);
+            gridClickers[row][column].setIcon(rectFourFull);
+            startTimer(row, column);
+            //reset dummy counter for this table so i can set it to full again and it will work
+            dummyCounter[row][column] = 0;
+        }
+        if(dirty.equals("Dirty"))
+        {
+            gridTables[row][column].setDirty(true);
+
+        }
+        else
+        {
+            gridTables[row][column].setDirty(false);
+
+        }
+    }
+
+    public void returnTableForTabManagement()
+    {
+        if(transactionMenuAskingForTable)
+        {
+            for(int x = 0; x < rowNumber; x++)
+            {
+                for(int y = 0; y < columnNumber; y++)
+                {
+                    //table selected and its full
+                    if(gridClickers[x][y].isSelected() && !gridTables[x][y].empty)
+                    {
+
+                        transactionMenuAskingForTable = false;
+                        //sending x and y values back to transaction menu
+                        transactionManager.column = y;
+                        transactionManager.row = x;
+                        transactionManager.addTabForTable();
+
+                        //System.out.println("test");
+
+                        
+                    }
+                }
+            }
+
+        }
+    }
+    //pretty crappy code, use get(x) and getY() to return the row and column of the selected button
 
 
-        BufferedImage resizedImage = new BufferedImage(gridButtonWidth, gridButtonLength,BufferedImage.TYPE_INT_ARGB);
-        Graphics2D g = resizedImage.createGraphics();
-        g.drawImage(resizedImage, 0, 0, gridButtonWidth, gridButtonLength, null);
-        g.dispose();
-        
-        rectFour = new ImageIcon(resizedImage);*/
+    public void startTimer(int row, int column)
+    {
+        tableTimers[row][column] = new Timer();
+        TimerTask duckingCount = new TimerTask(){
+                public void run()
+                {
+                    dummyCounter[row][column]++;
+                    if(dummyCounter[row][column] == 10)
+                    {
+
+                        timersduckingSuck(row, column);
+
+                    }
+                }
+            };
+
+        tableTimers[row][column].scheduleAtFixedRate(duckingCount,100,50);
+    }
+
+    public void timersduckingSuck(int row, int column)
+    {
+        long yup = 1000;
+
+        TimerTask flipColors = new TimerTask(){
+                public void run()
+                {
+                    if(!gridTables[row][column].empty)
+                    {
+                        if(counter[row][column] == 0)
+                        {
+                            gridClickers[row][column].setIcon(rectFourCheck);
+                            counter[row][column]++;
+                        }
+                        else
+                        {
+                            gridClickers[row][column].setIcon(rectFourFull);
+                            counter[row][column]--;
+                        }
+                    }
+                }
+            };
+        tableTimers[row][column].scheduleAtFixedRate(flipColors, yup, 600);
     }
 
     public boolean firstTimeEditingTables()
@@ -262,7 +384,20 @@ public class Interface extends Frame implements ActionListener,WindowListener,Mo
     public void actionPerformed(ActionEvent e)
     {
         setTableLocation();
-        changeStateOfTables();
+        returnTableForTabManagement();
+        if(!transactionMenuIsOpen)
+        {
+            openTableStateEditor();
+        }
+        //after i do all actionPerformed, make sure every button is deselected;
+        for(int x = 0; x < rowNumber; x++)
+        {
+            for(int y = 0; y < columnNumber; y++)
+            {
+                gridClickers[x][y].setSelected(false);
+            }
+        }
+
         //System.out.println("test");
 
     }
