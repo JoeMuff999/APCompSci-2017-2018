@@ -6,6 +6,7 @@ public class openTab
     public String[] foodType  = new String[20];
     public int[] amountOfFood = new int[20];
     int counter = 0;
+    Interface mainWindow = Interface.mainWindow;
     public openTab()
     {        
     }
@@ -20,6 +21,7 @@ public class openTab
     public void closeTab()
     {
         //reseting the tab on the table, might want to add the values to the stock list
+        mainWindow.updateInventory(foodType, amountOfFood);
         
         
         foodType = null;

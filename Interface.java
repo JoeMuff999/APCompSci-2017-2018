@@ -19,6 +19,7 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
     ImageIcon rectFourFull = new ImageIcon("rectFourFull.png");
     ImageIcon rectFourDirty = new ImageIcon("rectFourDirty.png");
     ImageIcon rectFourCheck = new ImageIcon("rectFourCheck.png");
+    ImageIcon menu = new ImageIcon("menu.png");
     //ImageIcon rectFour;
     JPanel grid;
     JPanel tab1;
@@ -38,9 +39,11 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
     public static boolean transactionMenuIsOpen;
     public static boolean transactionMenuAskingForTable = false;
     static DefaultListModel<String> listManager;
+    DefaultListModel<String> inventoryManager;
+    JList<String> inventory;
     transactionManager transaction;
     openTab[][] tabsForTables;
-
+    JPanel top;
 
     public static void main(String [] args)
     {
@@ -63,7 +66,7 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
 
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         main.addWindowListener(this);
-        main.setTitle("Muffoletto Restaurant Services: Version 1.0");
+        main.setTitle("Muffoletto Restaurant Services: Version 0.5");
         main.setSize(700,700);
         main.setVisible(true);
 
@@ -73,9 +76,16 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
     {
         //first tab
         whichTab = new JTabbedPane();
-        
+
         tab2 = new JPanel();
         tab2.setLayout(new BorderLayout());
+        JLabel tab2Label = new JLabel("Used Inventory");
+        tab2Label.setHorizontalAlignment(SwingConstants.CENTER);
+         top = new JPanel();
+         tab2   .setBackground(Color.WHITE);
+        top.setLayout(new BorderLayout());
+        top.add(tab2Label,BorderLayout.NORTH);
+        tab2.add(top,BorderLayout.NORTH);
         
 
         tab1 = new JPanel();
@@ -114,10 +124,14 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
         tab1.add(bottomButtons,BorderLayout.SOUTH);
 
         JPanel tab3 = new JPanel();
+        tab3.setLayout(new BorderLayout());
         JLabel tab3Label = new JLabel("Restauraunt Menu");
-        tab3.add(tab3Label);
+        JLabel lol = new JLabel(menu);
+        tab3.add(tab3Label,BorderLayout.NORTH);
+        tab3.add(lol,BorderLayout.CENTER);
 
         whichTab.addTab("Floor Layout",tab1);
+        whichTab.addTab("Inventory",tab2);
         whichTab.addTab("Menu",tab3);
 
     }
@@ -180,7 +194,7 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
         tableTimers = new Timer[rowNumber][columnNumber];
         dummyCounter = new int[rowNumber][columnNumber];
         counter = new int[rowNumber][columnNumber];
-         tabsForTables = new openTab[rowNumber][columnNumber];
+        tabsForTables = new openTab[rowNumber][columnNumber];
 
         for(int x = 0; x < rowNumber; x++)
         {
@@ -243,12 +257,15 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
             if(gridTables[row][column].openTab)
             {
                 gridTables[row][column].setOpenTab(false);
+                gridClickers[row][column].setIcon(rectFourDirty);
                 tabsForTables[row][column].closeTab();
+                //System.out.println("test");
             }
 
             if(dirty.equals("Dirty"))
             {
                 gridClickers[row][column].setIcon(rectFourDirty);
+                
             }
         }
         //if its a full table
@@ -293,7 +310,6 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
 
                         //System.out.println("test");
 
-                        
                     }
                 }
             }
@@ -301,7 +317,6 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
         }
     }
     //pretty crappy code, use get(x) and getY() to return the row and column of the selected button
-
 
     public void startTimer(int row, int column)
     {
@@ -374,6 +389,45 @@ public class Interface extends JFrame implements ActionListener,WindowListener,M
 
             placeTable();
         }
+    }
+
+    public void updateInventory(String[] addFoodToUsedInventory, int[] addAmountFoodUsedToInventory)
+    {
+        inventoryManager = new DefaultListModel<String>();
+        int safeCounter = 0;
+        int cost = 0;
+        for(int x = 1; x < addFoodToUsedInventory.length; x++)
+        {
+            if(addFoodToUsedInventory[x]!= null)
+            {
+                if(addFoodToUsedInventory[x].equals(addFoodToUsedInventory[x-1]))
+                {
+                    int first = addAmountFoodUsedToInventory[x];
+                    int second = addAmountFoodUsedToInventory[x-1];
+                    int third = second+first;
+                    
+                    if(addFoodToUsedInventory[x].equals("Burger"))
+                    {
+                        cost = 5;
+                    }
+                    inventoryManager.addElement("Food Type :: " + addFoodToUsedInventory[x] + "         Amount :: " + 
+                        third + "       Cost " + cost);
+                    
+                }
+                else
+                {
+                    cost = 5;
+                    inventoryManager.addElement("Food Type :: " + addFoodToUsedInventory[x] + " Amount :: " +  addAmountFoodUsedToInventory[x]+ 
+                    "       Cost " + cost);
+                }
+            }
+
+        }
+        inventory = new JList<String>(inventoryManager);
+        top.add(inventory, BorderLayout.NORTH);
+
+        tab2.validate();
+        tab2.repaint();
     }
 
     public void     windowClosing(WindowEvent e)

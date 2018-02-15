@@ -43,7 +43,7 @@ public class transaction extends JFrame
         String x = Character.toString(table.charAt(6));
         String y = Character.toString(table.charAt(8));
         mainWindow.tabsForTables[Integer.parseInt(x)][Integer.parseInt(y)].addFoodItems(food, amount);
-        System.out.println(mainWindow.tabsForTables[Integer.parseInt(x)][Integer.parseInt(y)]);
-        System.out.println(Integer.parseInt(x) + " " + Integer.parseInt(y));
+        //System.out.println(mainWindow.tabsForTables[Integer.parseInt(x)][Integer.parseInt(y)]);
+        //System.out.println(Integer.parseInt(x) + " " + Integer.parseInt(y));
     }
 }
